@@ -21,6 +21,7 @@ public class Sumator implements SumatorInterface {
             File.comparedContent[i] = File.compareLine(File.splitedContent[i]);
         }
 
+
         int t = 0;
         int f = 0;
         for (int i = 0; i < File.splitedContentLength; i++) {
@@ -39,7 +40,7 @@ public class Sumator implements SumatorInterface {
     private static class File {
     private static String content;
     private static String[][] splitedContent;
-    private static int splitedContentLength;
+    private static int splitedContentLength = 1;
     private static String[][] comparedContent;
 
 
@@ -63,56 +64,73 @@ public class Sumator implements SumatorInterface {
         }
 
         public static void splitFile() {
-            int n = 0;
+            if (content.endsWith("\n")) splitedContentLength--;
+
             for (int i = 0; i < content.length(); i++) {
-                if (content.charAt(i) == '\n') n++;
+                if (content.charAt(i) == '\n') splitedContentLength++;
             }
 
             String[] s = content.split("\n");
-            String[][] ss = new String[n][];
+            String[][] ss = new String[splitedContentLength][];
             for (int i = 0; i < ss.length; i++) {
                 ss[i] = s[i].split(";");
+
+                if (ss[i][2].charAt(ss[i][2].length() - 1) == '\r') {
+                    ss[i][2] = ss[i][2].substring(0, ss[i][2].length() - 1);
+                }
             }
+
             splitedContent = ss;
-            splitedContentLength = n;
         }
 
         public static String[] compareLine(String[] line) {
             String compareResult = "TRUE";
-            char[] n0 = new char[line[2].length() - 1];
-            //for (int i = 0; i < n0.length; i++) n0[i] = '0';
-            Arrays.fill(n0, 0, n0.length, '0');
 
-            char[] n1 = n0.clone();
-            char[] n2 = n0.clone();
-            char[] n3 = line[2].toCharArray().clone();
-
-            char[] charLine1 = line[0].toCharArray();
-            char[] charLine2 = line[1].toCharArray();
-
-            for (int i = n1.length - 1; i > n1.length - charLine1.length - 1; i--) {
-                n1[i] = charLine1[i - n1.length + charLine1.length];
+            if (line[2].length() < line[0].length() || line[2].length() < line[1].length()) {
+                compareResult = "FALSE";
             }
-            for (int i = n2.length - 1; i > n2.length - charLine2.length - 1; i--) {
-                n2[i] = charLine2[i - n2.length + charLine2.length];
-            }
+            else {
+                char[] n0 = new char[line[2].length()];
+                //for (int i = 0; i < n0.length; i++) n0[i] = '0';
+                Arrays.fill(n0, 0, n0.length, '0');
 
-            int iN0;
-            int iN1;
-            int iN2;
-            int iN3;
+                char[] n1 = n0.clone();
+                char[] n2 = n0.clone();
+                char[] n3 = line[2].toCharArray().clone();
 
-            for (int i = n0.length - 1; i > -1; i--) {
-                iN0 = Character.getNumericValue(n0[i]);
-                iN1 = Character.getNumericValue(n1[i]);
-                iN2 = Character.getNumericValue(n2[i]);
-                iN3 = Character.getNumericValue(n3[i]);
+                char[] charLine1 = line[0].toCharArray();
+                char[] charLine2 = line[1].toCharArray();
 
-                if (iN0 + iN1 + iN2 < iN3) compareResult = "FALSE";
-                else if (iN0 + iN1 + iN2 > iN3) {
-                    if (iN0 + iN1 + iN2 - 10 != iN3) compareResult = "FALSE";
-                    else {
-                        n0[i - 1]++;
+                for (int i = n1.length - 1; i > n1.length - charLine1.length - 1; i--) {
+                    n1[i] = charLine1[i - n1.length + charLine1.length];
+                }
+                for (int i = n2.length - 1; i > n2.length - charLine2.length - 1; i--) {
+                    n2[i] = charLine2[i - n2.length + charLine2.length];
+                }
+
+                int iN0;
+                int iN1;
+                int iN2;
+                int iN3;
+
+                for (int i = n0.length - 1; i > -1; i--) {
+                    iN0 = Character.getNumericValue(n0[i]);
+                    iN1 = Character.getNumericValue(n1[i]);
+                    iN2 = Character.getNumericValue(n2[i]);
+                    iN3 = Character.getNumericValue(n3[i]);
+
+                    if (iN0 + iN1 + iN2 < iN3) {
+                        compareResult = "FALSE";
+                        break;
+                    }
+                    else if (iN0 + iN1 + iN2 > iN3) {
+                        if (iN0 + iN1 + iN2 - 10 != iN3) {
+                            compareResult = "FALSE";
+                            break;
+                        }
+                        else {
+                            n0[i - 1]++;
+                        }
                     }
                 }
             }

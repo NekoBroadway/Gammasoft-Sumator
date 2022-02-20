@@ -6,7 +6,7 @@ import java.util.Scanner;
 public class Program {
 
     public static void main(String[] args) {
-        String path; // D:\Learning\4Me\Git Projects\furry-python\PythonApplication1\lorem4.txt
+        String path; // D:\Learning\4Me\Git Projects\furry-python\PythonApplication1\lorem3.txt
         if (args.length == 0) {
             Scanner s = new Scanner(System.in);
             System.out.print("Enter file path: ");
