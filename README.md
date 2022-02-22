@@ -1,4 +1,4 @@
-# Gammasoft-Sumator - Wersja 1.1
+# Gammasoft-Sumator - Wersja 1.2
 
 - Poprawne obliczenie
 - Czas wykonania:
