@@ -14,18 +14,19 @@ public class Sumator implements SumatorInterface {
         String confirmedPath = mFile.confirmDirectory(path);
 
         System.out.println("(run) START");
+
         float start = System.nanoTime();
-
-        ArrayList<Boolean> resultOfComparing = mFile.compareAllContent(confirmedPath);
-
+        ArrayList<Boolean> resultOfComparing = mFile.processFile(confirmedPath);
         float end = System.nanoTime();
+
         System.out.println("(run) END");
-        System.out.println("(run) Time - " + new DecimalFormat("###.###").format((end - start) / 1000000000) + " sec");
+        System.out.println("(run) Time - " + new DecimalFormat("###.###").format((end - start) / 1000000000) + " sec" + "\n");
 
         mFile.showResult(resultOfComparing);
     }
 
     private static class mFile {
+
         public static String confirmDirectory(String[] p) {
             String path;
             Scanner s = new Scanner(System.in);
@@ -49,63 +50,99 @@ public class Sumator implements SumatorInterface {
             return path;
         }
 
-        public static ArrayList<Boolean> compareAllContent(String path) {
 
-            ArrayList<Boolean> res = new ArrayList<>();
+        public static ArrayList<Boolean> processFile(String path) {
+            ArrayList<Boolean> compareResult = new ArrayList<>();
 
             try {
                 Scanner s = new Scanner(new File(path));
-                boolean b;
-
+                String[] line;
                 while (s.hasNext()) {
-                    b = true;
-                    String[] scannedNumbers = s.nextLine().split(";");
+                    line = s.nextLine().split(";");
 
-                    int n1Length = scannedNumbers[0].length();
-                    int n2Length = scannedNumbers[1].length();
-                    int n3Length = scannedNumbers[2].length();
+                    int line1Length = line[0].length();
+                    int line2Length = line[1].length();
+                    int line3Length = line[2].length();
 
-                    if (n3Length < n2Length || n3Length < n1Length) {
-                        b = false;
+                    if (line3Length < line1Length || line3Length < line2Length || (line3Length - line1Length > 1 && line3Length - line2Length > 1)) {
+                        compareResult.add(false);
                     }
                     else {
-                        //Set sum rest array
-                        char[] rest = "0".repeat(scannedNumbers[2].length()).toCharArray();
+                        String line1 = line[0];
+                        String line2 = line[1];
+                        String line3 = line[2];
 
-                        //Extend numbers length up to sum result number length
-                        scannedNumbers[0] = "0".repeat(n3Length - n1Length) + scannedNumbers[0];
-                        scannedNumbers[1] = "0".repeat(n3Length - n2Length) + scannedNumbers[1];
+                        StringBuilder sb = new StringBuilder("");
 
-                        int N0, N1, N2, N3;
+                        sb.append("0".repeat(line3Length - line1Length)).append(line1);
+                        line1 = sb.toString();
+                        sb = new StringBuilder("");
 
-                        for (int i = n3Length - 1; i > -1; i--) {
-                            N0 = Character.getNumericValue(rest[i]);
-                            N1 = Character.getNumericValue(scannedNumbers[0].charAt(i));
-                            N2 = Character.getNumericValue(scannedNumbers[1].charAt(i));
-                            N3 = Character.getNumericValue(scannedNumbers[2].charAt(i));
+                        sb.append("0".repeat(line3Length - line2Length)).append(line2);
+                        line2 = sb.toString();
 
-                            if (N0 + N1 + N2 != N3) {
-                                if (N0 + N1 + N2 - 10 == N3) {
-                                    rest[i - 1]++;
-                                } else {
-                                    b = false;
-                                    break;
-                                }
-                            }
-                        }
+                        int parts = line3Length % 6 == 0 ? line3Length / 6 : Math.floorDiv(line3Length, 6) + 1;
+                        int partialN1[] = getPartsOfNumber(line1, parts);
+                        int partialN2[] = getPartsOfNumber(line2, parts);
+                        int partialN3[] = getPartsOfNumber(line3, parts);
+                        int partialN0[] = new int[partialN3.length];
+
+                        compareResult.add(compareParts(partialN1, partialN2, partialN3, partialN0, parts));
                     }
-                    res.add(b);
                 }
-                s.close();
             }
             catch (FileNotFoundException ex) {
                 System.out.println(ex);
             }
 
-            return res;
+            return compareResult;
         }
 
-        private static void showResult(ArrayList<Boolean> arr) {
+
+        private static int[] getPartsOfNumber(String number, int parts) {
+            int[] partialNumber = new int[parts];
+
+            if (parts == 1) {
+                partialNumber[0] = Integer.parseInt(number);
+            }
+            else {
+                StringBuilder sb = new StringBuilder(number);
+                int sbLength;
+
+                for (int part = parts - 1; part > -1; part--) {
+                    sbLength = sb.length();
+                    if (sbLength >= 6) {
+                        String numberPart = sb.substring(sbLength - 6, sbLength);
+                        partialNumber[part] = Integer.parseInt(numberPart);
+                        sb.delete(sbLength - 6, sb.length());
+                    }
+                    else {
+                        partialNumber[part] = Integer.parseInt(sb.substring(0, sbLength));
+                        break;
+                    }
+                }
+            }
+
+            return partialNumber;
+        }
+
+
+        private static Boolean compareParts(int[] n1, int[] n2, int[] n3, int[] n0, int parts) {
+
+            for (int part = parts - 1; part > -1; part--) {
+                if (n0[part] + n1[part] + n2[part] != n3[part]) {
+                    if (n0[part] + n1[part] + n2[part] - 1000000 != n3[part]) {
+                        return false;
+                    }
+                    else {
+                        n0[part - 1] += 1;
+                    }
+                }
+            }
+            return true;
+        }
+
+        public static void showResult(ArrayList<Boolean> arr) {
             int t = 0;
             int f = 0;
 
