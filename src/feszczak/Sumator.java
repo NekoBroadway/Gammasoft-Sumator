@@ -1,6 +1,8 @@
 package feszczak;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
@@ -55,10 +57,12 @@ public class Sumator implements SumatorInterface {
             ArrayList<Boolean> compareResult = new ArrayList<>();
 
             try {
-                Scanner s = new Scanner(new File(path));
+                BufferedReader br = new BufferedReader(new FileReader(path));
+                String bufferedLine;
                 String[] line;
-                while (s.hasNext()) {
-                    line = s.nextLine().split(";");
+
+                while ((bufferedLine = br.readLine()) != null) {
+                    line = bufferedLine.split(";");
 
                     int line1Length = line[0].length();
                     int line2Length = line[1].length();
@@ -91,7 +95,7 @@ public class Sumator implements SumatorInterface {
                     }
                 }
             }
-            catch (FileNotFoundException ex) {
+            catch (IOException ex) {
                 System.out.println(ex);
             }
 
